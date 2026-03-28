@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+baseline_scores.json
+*.egg-info/
+dist/
+build/

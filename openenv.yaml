@@ -1,0 +1,93 @@
+# ─────────────────────────────────────────
+# openenv.yaml
+# OpenEnv spec metadata for validation
+# ─────────────────────────────────────────
+
+name: smart-inventory-optimization
+version: "1.0.0"
+description: >
+  A production-grade simulation of a real-world inventory management system.
+  An AI agent observes warehouse state and decides how much inventory to order
+  each day to maximize service level while minimizing holding and stockout costs.
+
+author: "Your Name"
+license: "MIT"
+
+environment:
+  entry_point: "server:app"
+  host: "0.0.0.0"
+  port: 7860
+  framework: "fastapi"
+
+tasks:
+  - id: task1_easy
+    name: "Deterministic Inventory Control"
+    difficulty: easy
+    episode_length: 30
+    description: >
+      Single product, perfectly reliable supplier, fixed demand of 50 units/day.
+      Agent learns basic reorder point logic with no uncertainty.
+
+  - id: task2_medium
+    name: "Stochastic Demand with Variable Lead Times"
+    difficulty: medium
+    episode_length: 45
+    description: >
+      Demand fluctuates ±20%, supplier reliability 85%, lead times 1–5 days.
+      Agent must buffer against uncertainty without overstocking.
+
+  - id: task3_hard
+    name: "Seasonal Demand with Unreliable Suppliers"
+    difficulty: hard
+    episode_length: 60
+    description: >
+      High demand uncertainty (±40%) with mid-episode seasonal spike.
+      Supplier reliability 65%, lead times 2–7 days, strict budget constraint.
+
+observation_space:
+  type: object
+  fields:
+    stock:                {type: integer, description: "Current inventory level"}
+    demand_forecast:      {type: float,   description: "Predicted next-period demand"}
+    lead_time:            {type: integer, description: "Days until delivery"}
+    in_transit:           {type: integer, description: "Units already ordered"}
+    supplier_reliability: {type: float,   description: "Fulfillment probability 0–1"}
+    holding_cost:         {type: float,   description: "Cost per unit per day"}
+    stockout_penalty:     {type: float,   description: "Cost per unmet unit"}
+    warehouse_capacity:   {type: integer, description: "Max storable units"}
+    days_remaining:       {type: integer, description: "Steps left in episode"}
+    budget_remaining:     {type: float,   description: "Remaining budget (Task 3)"}
+    current_day:          {type: integer, description: "Current episode day"}
+    season_factor:        {type: float,   description: "Demand multiplier for seasonality"}
+
+action_space:
+  type: object
+  fields:
+    order_qty: {type: integer, description: "Units to order this step (0 to max)"}
+
+reward:
+  type: float
+  range: [-inf, +inf]
+  description: >
+    revenue - holding_cost - stockout_penalty - capacity_violation - step_penalty.
+    Provides continuous partial feedback every step.
+
+endpoints:
+  health: "GET /health"
+  reset:  "POST /reset"
+  step:   "POST /step"
+  state:  "GET /state"
+  tasks:  "GET /tasks"
+  score:  "GET /score"
+
+docker:
+  image: "inventory-opt-env"
+  port: 7860
+
+huggingface:
+  space_sdk: "docker"
+  tags:
+    - openenv
+    - reinforcement-learning
+    - inventory-management
+    - supply-chain
