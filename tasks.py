@@ -150,12 +150,59 @@ def make_task3() -> TaskConfig:
 
 
 # ─────────────────────────────────────────
+# TASK 4 — EXTREME (market chaos)
+# ─────────────────────────────────────────
+def make_task4() -> TaskConfig:
+    demand = DemandModel(
+        base_demand=100,
+        noise_level=0.6,       # ±60% demand swings
+        seasonal=True,         # multiple spikes
+    )
+    supplier = Supplier(
+        name="ChaosSupplier",
+        reliability=0.40,      # fails 60% of the time
+        lead_time_min=3,
+        lead_time_max=10,      # wide unpredictable lead time
+    )
+    sim = InventorySimulator(
+        demand_model=demand,
+        supplier=supplier,
+        warehouse_capacity=300,    # very tight warehouse
+        holding_cost=2.0,          # expensive to hold
+        stockout_penalty=8.0,      # very expensive to stock out
+        revenue_per_unit=10.0,
+        episode_length=90,         # longest episode
+        initial_stock=200,
+        budget=8000.0,             # tight budget for 90 days
+        order_cost_per_unit=3.0,   # expensive orders
+    )
+    return TaskConfig(
+        task_id="task4_extreme",
+        name="Market Chaos — Supply Chain Disruption",
+        difficulty="extreme",
+        description=(
+            "Simulates a real supply chain crisis: "
+            "demand swings ±60% with multiple seasonal spikes. "
+            "Supplier reliability crashes to 40% with lead times of 3–10 days. "
+            "Tiny warehouse (300 units), expensive holding costs, "
+            "strict budget ($8000 for 90 days). "
+            "Only the most adaptive agents survive."
+        ),
+        episode_length=90,
+        max_order_qty=200,
+        num_products=1,
+        simulator=sim,
+    )
+
+
+# ─────────────────────────────────────────
 # REGISTRY — all tasks in one place
 # ─────────────────────────────────────────
 TASK_REGISTRY = {
-    "task1_easy":   make_task1,
-    "task2_medium": make_task2,
-    "task3_hard":   make_task3,
+    "task1_easy":    make_task1,
+    "task2_medium":  make_task2,
+    "task3_hard":    make_task3,
+    "task4_extreme": make_task4,
 }
 
 def get_task(task_id: str) -> TaskConfig:

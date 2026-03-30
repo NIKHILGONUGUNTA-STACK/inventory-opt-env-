@@ -156,6 +156,15 @@ def make_shaper_for_task(task_id: str) -> RewardShaper:
             step_penalty=0.01,
             budget_violation_weight=5.0,   # strict budget in Task 3
         ),
+        "task4_extreme": dict(
+            revenue_per_unit=10.0,
+            holding_cost=2.0,              # very expensive to hold
+            stockout_penalty=8.0,          # very expensive to stockout
+            warehouse_capacity=300,        # tiny warehouse
+            capacity_violation_weight=20.0, # harsh capacity penalties
+            step_penalty=0.01,
+            budget_violation_weight=10.0,  # very harsh budget penalties
+        ),
     }
     if task_id not in configs:
         raise ValueError(f"Unknown task_id '{task_id}'")

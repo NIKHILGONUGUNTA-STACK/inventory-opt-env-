@@ -289,12 +289,95 @@ class Task3Grader(BaseGrader):
 
 
 # ─────────────────────────────────────────
+# TASK 4 GRADER — extreme
+# Strictest scoring — most agents score < 0.3
+# ─────────────────────────────────────────
+class Task4Grader(BaseGrader):
+    def __init__(self):
+        super().__init__("task4_extreme")
+
+    def score(self, tracker: EpisodeTracker) -> dict:
+        """
+        Task 4 extreme rubric:
+        - Service level (35%): fulfill demand during chaos
+        - Cost efficiency (35%): survive on tight budget
+        - Constraint adherence (30%): capacity + budget violations
+
+        Designed so that:
+        - Random agent scores ~0.05–0.10
+        - Heuristic agent scores ~0.10–0.20
+        - Smart LLM agent scores ~0.25–0.45
+        - Near-optimal agent scores ~0.50–0.70
+        """
+        if tracker.total_demand == 0:
+            return self._result(1.0, 1.0, 1.0, 1.0)
+
+        # service level — strict
+        service_level = round(
+            min(tracker.total_fulfilled / tracker.total_demand, 1.0), 4
+        )
+
+        # cost efficiency — very strict benchmark (5% of revenue)
+        total_cost = tracker.total_holding_cost + tracker.total_stockout_cost
+        benchmark  = 0.05 * tracker.total_revenue
+        cost_ratio = total_cost / max(benchmark, 1.0)
+        cost_efficiency = round(max(0.0, 1.0 - (cost_ratio - 1.0) * 0.25), 4)
+
+        # constraint adherence — both capacity and budget
+        capacity_rate = tracker.capacity_violations / max(tracker.steps, 1)
+        budget_rate   = tracker.budget_violations   / max(tracker.steps, 1)
+        constraint    = round(
+            max(0.0, 1.0 - capacity_rate * 3.0 - budget_rate * 4.0), 4
+        )
+
+        # chaos survival bonus
+        # reward agents that maintained positive reward mid-episode
+        if tracker.reward_history:
+            positive_steps = sum(
+                1 for r in tracker.reward_history if r > 0
+            )
+            survival_rate  = positive_steps / len(tracker.reward_history)
+            chaos_bonus    = round(0.05 * survival_rate, 4)
+        else:
+            chaos_bonus = 0.0
+
+        # final score
+        final = round(
+            0.35 * service_level +
+            0.35 * cost_efficiency +
+            0.30 * constraint +
+            chaos_bonus,
+            4
+        )
+        final = max(0.0, min(1.0, final))
+
+        return self._result(final, service_level, cost_efficiency, constraint)
+
+    def _result(self, score, sl, ce, ca):
+        return {
+            "task_id":              self.task_id,
+            "score":                max(0.0, min(1.0, score)),
+            "service_level":        sl,
+            "cost_efficiency":      ce,
+            "constraint_adherence": ca,
+            "details": {
+                "weight_service_level":        0.35,
+                "weight_cost_efficiency":      0.35,
+                "weight_constraint_adherence": 0.30,
+                "chaos_bonus":                 "up to +0.05",
+                "note": "Designed to challenge frontier LLMs",
+            }
+        }
+
+
+# ─────────────────────────────────────────
 # GRADER REGISTRY
 # ─────────────────────────────────────────
 GRADER_REGISTRY = {
-    "task1_easy":   Task1Grader,
-    "task2_medium": Task2Grader,
-    "task3_hard":   Task3Grader,
+    "task1_easy":    Task1Grader,
+    "task2_medium":  Task2Grader,
+    "task3_hard":    Task3Grader,
+    "task4_extreme": Task4Grader,
 }
 
 def get_grader(task_id: str) -> BaseGrader:

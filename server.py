@@ -237,7 +237,7 @@ def reset(request: ResetRequest):
       POST /reset
       {"task_id": "task2_medium"}
     """
-    valid_tasks = ["task1_easy", "task2_medium", "task3_hard"]
+    valid_tasks = ["task1_easy", "task2_medium", "task3_hard", "task4_extreme"]
     if request.task_id not in valid_tasks:
         raise HTTPException(
             status_code=400,
