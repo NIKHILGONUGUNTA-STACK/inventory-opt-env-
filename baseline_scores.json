@@ -1,0 +1,30 @@
+{
+  "model": "gpt-4o-mini",
+  "results": [
+    {
+      "task_id": "task1_easy",
+      "score": 1.0,
+      "service_level": 1.0,
+      "cost_efficiency": 1.0,
+      "constraint_adherence": 1.0,
+      "total_reward": 6777.3
+    },
+    {
+      "task_id": "task2_medium",
+      "score": 0.7409,
+      "service_level": 0.6822,
+      "cost_efficiency": 0.7137,
+      "constraint_adherence": 1.0,
+      "total_reward": 9035.47
+    },
+    {
+      "task_id": "task3_hard",
+      "score": 0.2324,
+      "service_level": 0.456,
+      "cost_efficiency": 0.0,
+      "constraint_adherence": 0.0,
+      "total_reward": 3230.73
+    }
+  ],
+  "average_score": 0.6577666666666667
+}
