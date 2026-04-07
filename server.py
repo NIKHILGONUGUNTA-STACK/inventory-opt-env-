@@ -9,7 +9,7 @@
 #   GET  /state
 #   GET  /score
 # ─────────────────────────────────────────
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -228,7 +228,7 @@ def list_tasks():
 
 
 @app.post("/reset", response_model=ResetResponse)
-def reset(request: ResetRequest):
+def reset(request: Optional[ResetRequest] = Body(default=None)):
     """
     Reset the environment to start a new episode.
     Optionally switch to a different task.
@@ -236,7 +236,12 @@ def reset(request: ResetRequest):
     Example:
       POST /reset
       {"task_id": "task2_medium"}
+      
+    If no body is sent, defaults to task1_easy.
     """
+    if request is None:
+        request = ResetRequest()
+    
     valid_tasks = ["task1_easy", "task2_medium", "task3_hard", "task4_extreme"]
     if request.task_id not in valid_tasks:
         raise HTTPException(
